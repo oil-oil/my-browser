@@ -34,8 +34,8 @@ scripts/my-browser
 Clone the repository and run the CLI directly:
 
 ```bash
-git clone https://github.com/oil-oil/browser-control-lab.git
-cd browser-control-lab
+git clone https://github.com/oil-oil/my-browser.git
+cd my-browser
 ./scripts/my-browser ensure
 ./scripts/my-browser doctor
 ```
