@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Publishing Form Automation Test</title>
+    <style>
+      body {
+        font: 16px/1.5 -apple-system, BlinkMacSystemFont, sans-serif;
+        max-width: 760px;
+        margin: 40px auto;
+      }
+
+      label, input, textarea, select, button {
+        display: block;
+        margin: 12px 0;
+      }
+
+      input, textarea, select {
+        width: 420px;
+        padding: 8px;
+      }
+
+      textarea {
+        height: 90px;
+      }
+
+      button {
+        padding: 8px 12px;
+      }
+
+      #hover-target {
+        width: 260px;
+        padding: 18px;
+        border: 1px solid #aaa;
+        background: #f4f4f4;
+      }
+
+      #rich-editor {
+        min-height: 70px;
+        width: 420px;
+        border: 1px solid #aaa;
+        padding: 10px;
+        margin: 12px 0;
+      }
+
+      #hover-target:hover {
+        background: #def4ff;
+      }
+
+      .spacer {
+        height: 900px;
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+        margin: 28px 0;
+      }
+
+      #result {
+        white-space: pre-wrap;
+        padding: 12px;
+        border: 1px solid #ddd;
+        background: #fafafa;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Publishing Form Automation Test</h1>
+
+    <label for="video-file">Video file</label>
+    <input id="video-file" type="file" accept="video/*,.txt">
+
+    <label for="unused-file">Unused first input</label>
+    <input id="unused-file" type="file">
+
+    <label for="cover-file">Hidden cover file</label>
+    <input id="cover-file" type="file" accept="image/*,.txt" hidden>
+
+    <label for="title">Title</label>
+    <input id="title" placeholder="Title">
+
+    <label for="body">Body</label>
+    <textarea id="body" placeholder="Body"></textarea>
+
+    <label for="rich-editor">Rich editor</label>
+    <div id="rich-editor" contenteditable="true" role="textbox" aria-label="Rich editor"></div>
+
+    <label for="type">Bilibili type</label>
+    <select id="type">
+      <option value="">Choose type</option>
+      <option value="self">Self-made</option>
+      <option value="repost">Repost</option>
+    </select>
+
+    <label>
+      <input id="original" type="checkbox">
+      Original declaration
+    </label>
+
+    <div id="hover-target" tabindex="0">Hover target</div>
+
+    <div class="spacer">Scroll through this spacer.</div>
+
+    <button id="deep-action" type="button">Deep action</button>
+    <p id="focus-state">Focus: none</p>
+    <p id="hover-state">Hover: no</p>
+    <p id="keyboard-state">Keyboard events: 0</p>
+    <pre id="result">Waiting</pre>
+
+    <script>
+      function fileNames(input) {
+        return [...input.files].map((file) => file.name).join(", ");
+      }
+
+      function render() {
+        document.querySelector("#result").textContent = JSON.stringify({
+          video: fileNames(document.querySelector("#video-file")),
+          cover: fileNames(document.querySelector("#cover-file")),
+          title: document.querySelector("#title").value,
+          body: document.querySelector("#body").value,
+          rich: document.querySelector("#rich-editor").innerText,
+          type: document.querySelector("#type").value,
+          original: document.querySelector("#original").checked,
+          focus: document.activeElement?.id || document.activeElement?.tagName,
+          scrollY: window.scrollY
+        }, null, 2);
+      }
+
+      for (const eventName of ["input", "change", "click", "keyup"]) {
+        document.addEventListener(eventName, render, true);
+      }
+
+      document.querySelector("#hover-target").addEventListener("mouseenter", () => {
+        document.querySelector("#hover-state").textContent = "Hover: yes";
+        render();
+      });
+
+      let keyboardEvents = 0;
+      document.querySelector("#rich-editor").addEventListener("keydown", () => {
+        keyboardEvents += 1;
+        document.querySelector("#keyboard-state").textContent = "Keyboard events: " + keyboardEvents;
+      });
+
+      document.addEventListener("focusin", () => {
+        document.querySelector("#focus-state").textContent = "Focus: " + (document.activeElement?.id || document.activeElement?.tagName);
+        render();
+      });
+
+      document.querySelector("#deep-action").addEventListener("click", () => {
+        document.querySelector("#result").textContent += "\\nDeep action clicked";
+      });
+
+      window.appReady = true;
+      render();
+    </script>
+  </body>
+</html>

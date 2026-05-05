@@ -1,0 +1,24 @@
+{
+  "name": "browser-control-lab",
+  "version": "0.2.0",
+  "private": false,
+  "type": "module",
+  "description": "Local real-Chrome automation CLI and extension bridge for AI agents.",
+  "bin": {
+    "my-browser": "./scripts/my-browser"
+  },
+  "scripts": {
+    "check": "node --check local-agent.mjs && node --check src/cli/main.mjs && node --check local-browser-operator-extension/background.js",
+    "agent": "node local-agent.mjs"
+  },
+  "keywords": [
+    "browser-automation",
+    "chrome-extension",
+    "ai-agent",
+    "local-first"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}

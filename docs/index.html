@@ -1,0 +1,1340 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Browser CLI</title>
+    <meta name="description" content="My Browser makes browser automation simple for agents by using your existing Chrome, current login state, and a self-healing local skill.">
+    <link rel="icon" href="./assets/icon-48.png" type="image/png">
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #09111f;
+        --text: #111827;
+        --muted: #647084;
+        --soft: #f7f8f6;
+        --paper: #ffffff;
+        --line: #e1e5ea;
+        --line-strong: #cbd3de;
+        --blue: #2f80ed;
+        --green: #1c9b68;
+        --moss: #dce9df;
+        --clay: #e8ded2;
+        --plum: #4c3b68;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        overflow-x: hidden;
+        background: var(--soft);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        letter-spacing: 0;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .shell {
+        width: min(1160px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--green);
+        font-size: 13px;
+        font-weight: 760;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+        box-shadow: 0 0 0 6px rgba(28, 155, 104, 0.1);
+      }
+
+      header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 30;
+        border-bottom: 1px solid rgba(9, 17, 31, 0.08);
+        background: rgba(247, 248, 246, 0.86);
+        backdrop-filter: blur(18px);
+      }
+
+      nav {
+        display: flex;
+        min-height: 70px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 780;
+      }
+
+      .brand img {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+        box-shadow: 0 10px 28px rgba(9, 17, 31, 0.12);
+      }
+
+      .links {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 650;
+      }
+
+      .links a:hover {
+        color: var(--ink);
+      }
+
+      .button {
+        display: inline-flex;
+        min-height: 43px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--ink);
+        border-radius: 999px;
+        padding: 0 18px;
+        background: var(--ink);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 760;
+        white-space: nowrap;
+      }
+
+      .button.secondary {
+        border-color: rgba(9, 17, 31, 0.14);
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--ink);
+      }
+
+      .hero {
+        position: relative;
+        min-height: 94svh;
+        overflow: hidden;
+        padding: 146px 0 86px;
+        background:
+          linear-gradient(135deg, rgba(232, 222, 210, 0.26) 0%, transparent 34%),
+          linear-gradient(180deg, #fbfbf8 0%, var(--soft) 74%);
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+        background: var(--line);
+      }
+
+      .hero-copy {
+        position: relative;
+        z-index: 2;
+        max-width: 650px;
+        padding-top: 30px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 24px;
+        color: var(--ink);
+        font-size: clamp(56px, 7.2vw, 94px);
+        line-height: 0.94;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        max-width: 600px;
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 19px;
+        line-height: 1.68;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 34px;
+      }
+
+      .proof-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 32px;
+        color: #4d5a6c;
+        font-size: 13px;
+        font-weight: 660;
+      }
+
+      .proof-row span {
+        display: inline-flex;
+        min-height: 32px;
+        align-items: center;
+        border: 1px solid rgba(9, 17, 31, 0.1);
+        border-radius: 999px;
+        padding: 0 12px;
+        background: rgba(255, 255, 255, 0.66);
+      }
+
+      .hero-stage {
+        position: absolute;
+        top: 132px;
+        right: max(46px, calc((100vw - 1160px) / 2));
+        z-index: 1;
+        width: min(640px, 47vw);
+        height: min(620px, 62vw);
+        pointer-events: none;
+      }
+
+      .stage-browser {
+        position: absolute;
+        top: 156px;
+        right: 0;
+        width: 82%;
+        min-height: 360px;
+        border: 1px solid rgba(9, 17, 31, 0.11);
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: 0 34px 90px rgba(9, 17, 31, 0.12);
+        backdrop-filter: blur(18px);
+      }
+
+      .stage-top {
+        display: flex;
+        height: 64px;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid var(--line);
+        padding: 0 20px;
+      }
+
+      .traffic {
+        display: flex;
+        gap: 7px;
+      }
+
+      .traffic i {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #f16c64;
+      }
+
+      .traffic i:nth-child(2) {
+        background: #e6b84d;
+      }
+
+      .traffic i:nth-child(3) {
+        background: #42b883;
+      }
+
+      .tab-strip {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        align-items: center;
+        gap: 8px;
+        margin-left: 10px;
+      }
+
+      .tab {
+        height: 30px;
+        border-radius: 999px;
+        background: #eef1f5;
+      }
+
+      .tab.user {
+        width: 84px;
+      }
+
+      .tab.group {
+        width: 126px;
+        border: 1px solid rgba(28, 155, 104, 0.22);
+        background: var(--moss);
+      }
+
+      .page-lines {
+        display: grid;
+        gap: 13px;
+        padding: 34px 34px 0;
+      }
+
+      .page-lines span {
+        display: block;
+        height: 12px;
+        border-radius: 999px;
+        background: #e8edf3;
+      }
+
+      .page-lines span:nth-child(1) {
+        width: 58%;
+        height: 18px;
+        background: #d7e1ee;
+      }
+
+      .page-lines span:nth-child(2) {
+        width: 76%;
+      }
+
+      .page-lines span:nth-child(3) {
+        width: 42%;
+      }
+
+      .upload-panel {
+        margin: 30px 34px 0;
+        border: 1px dashed #b7c1ce;
+        border-radius: 18px;
+        padding: 20px;
+        background: #fbfcfd;
+      }
+
+      .upload-panel strong {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--ink);
+        font-size: 15px;
+      }
+
+      .upload-panel span {
+        display: block;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .stage-logo {
+        position: absolute;
+        top: 92px;
+        left: 0;
+        z-index: 2;
+        width: 126px;
+        height: 126px;
+        border-radius: 32px;
+        box-shadow: 0 24px 70px rgba(9, 17, 31, 0.16);
+        animation: floatLogo 8s ease-in-out infinite;
+      }
+
+      .intent-card,
+      .auto-stack,
+      .stage-command,
+      .stage-result {
+        position: absolute;
+        border: 1px solid rgba(9, 17, 31, 0.1);
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.86);
+        box-shadow: 0 24px 60px rgba(9, 17, 31, 0.1);
+        backdrop-filter: blur(18px);
+      }
+
+      .intent-card {
+        top: 0;
+        left: 76px;
+        z-index: 3;
+        width: 360px;
+        padding: 20px;
+      }
+
+      .intent-card p {
+        margin: 0;
+        color: var(--ink);
+        font-size: 22px;
+        font-weight: 780;
+        line-height: 1.28;
+      }
+
+      .intent-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .intent-meta span {
+        display: inline-flex;
+        min-height: 28px;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0 10px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 720;
+      }
+
+      .auto-stack {
+        left: 36px;
+        bottom: 72px;
+        z-index: 4;
+        width: 310px;
+        padding: 14px;
+      }
+
+      .auto-step {
+        display: grid;
+        grid-template-columns: 24px 1fr;
+        gap: 10px;
+        align-items: center;
+        border-radius: 14px;
+        padding: 10px;
+        color: #42506a;
+        font-size: 13px;
+        font-weight: 720;
+        animation: stepGlow 7.2s ease-in-out infinite;
+      }
+
+      .auto-step + .auto-step {
+        margin-top: 4px;
+      }
+
+      .auto-step:nth-child(2) {
+        animation-delay: 1.2s;
+      }
+
+      .auto-step:nth-child(3) {
+        animation-delay: 2.4s;
+      }
+
+      .auto-step:nth-child(4) {
+        animation-delay: 3.6s;
+      }
+
+      .auto-step i {
+        display: inline-flex;
+        width: 24px;
+        height: 24px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(28, 155, 104, 0.1);
+        color: var(--green);
+        font-style: normal;
+        font-size: 12px;
+      }
+
+      .stage-command {
+        display: none;
+        left: 0;
+        bottom: 74px;
+        width: 310px;
+        padding: 18px;
+      }
+
+      .stage-result {
+        right: 22px;
+        bottom: 0;
+        z-index: 5;
+        width: 260px;
+        padding: 16px;
+      }
+
+      .label {
+        margin-bottom: 11px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 760;
+        text-transform: uppercase;
+      }
+
+      .mono {
+        color: #172033;
+        font: 12px/1.7 "SFMono-Regular", Consolas, monospace;
+      }
+
+      .mono .blue {
+        color: var(--blue);
+      }
+
+      .mono .green {
+        color: var(--green);
+      }
+
+      .route {
+        position: absolute;
+        left: 180px;
+        top: 122px;
+        width: 330px;
+        height: 170px;
+      }
+
+      .route path {
+        fill: none;
+        stroke: var(--blue);
+        stroke-linecap: round;
+        stroke-width: 3;
+        stroke-dasharray: 8 12;
+        animation: dash 5.5s linear infinite;
+      }
+
+      .peek {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 22px;
+        z-index: 2;
+        display: flex;
+        justify-content: center;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .peek a {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid rgba(9, 17, 31, 0.12);
+        border-radius: 999px;
+        padding: 9px 13px;
+        background: rgba(255, 255, 255, 0.72);
+      }
+
+      @keyframes dash {
+        to {
+          stroke-dashoffset: -80;
+        }
+      }
+
+      @keyframes floatLogo {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      @keyframes stepGlow {
+        0%, 100% {
+          background: transparent;
+        }
+        18%, 30% {
+          background: rgba(28, 155, 104, 0.08);
+        }
+      }
+
+      section {
+        padding: 92px 0;
+      }
+
+      .section-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 0.52fr);
+        gap: 46px;
+        align-items: end;
+        margin-bottom: 34px;
+      }
+
+      h2 {
+        margin-bottom: 0;
+        color: var(--ink);
+        font-size: clamp(36px, 5vw, 64px);
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .section-head p,
+      .section-copy {
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.65;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .feature {
+        min-height: 250px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 24px;
+        background: var(--paper);
+      }
+
+      .feature b {
+        display: inline-flex;
+        min-height: 27px;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0 10px;
+        background: #eef4ff;
+        color: #2860c7;
+        font-size: 12px;
+        letter-spacing: 0;
+      }
+
+      .feature:nth-child(2) b {
+        background: var(--moss);
+        color: #1d6f4f;
+      }
+
+      .feature:nth-child(3) b {
+        background: #f0e9f8;
+        color: var(--plum);
+      }
+
+      .feature h3 {
+        margin: 22px 0 10px;
+        font-size: 22px;
+        line-height: 1.18;
+      }
+
+      .feature p {
+        margin-bottom: 0;
+        color: var(--muted);
+        line-height: 1.58;
+      }
+
+      .flow-section {
+        background: #ffffff;
+        border-block: 1px solid var(--line);
+      }
+
+      .command-flow {
+        display: grid;
+        grid-template-columns: minmax(300px, 0.78fr) minmax(0, 1.22fr);
+        gap: 48px;
+        align-items: start;
+      }
+
+      .steps {
+        display: grid;
+        gap: 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 54px 1fr;
+        gap: 16px;
+        border-bottom: 1px solid var(--line);
+        padding: 20px 0;
+      }
+
+      .step-num {
+        display: inline-flex;
+        width: 38px;
+        height: 38px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        color: var(--green);
+        font-weight: 800;
+      }
+
+      .step h3 {
+        margin-bottom: 6px;
+        font-size: 18px;
+      }
+
+      .step p {
+        margin-bottom: 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      pre {
+        overflow: auto;
+        margin: 0;
+        border-radius: 8px;
+        background: var(--ink);
+        color: #e8eef7;
+        padding: 26px;
+        font: 13px/1.86 "SFMono-Regular", Consolas, monospace;
+      }
+
+      code {
+        font-family: "SFMono-Regular", Consolas, monospace;
+      }
+
+      .code-note {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .code-note span {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 8px 10px;
+        background: #fff;
+      }
+
+      .principles {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--line);
+      }
+
+      .principle {
+        min-height: 180px;
+        padding: 24px;
+        background: #fbfbf9;
+      }
+
+      .principle strong {
+        display: block;
+        margin-bottom: 12px;
+        color: var(--ink);
+        font-size: 18px;
+      }
+
+      .principle p {
+        margin-bottom: 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .install-strip {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        margin-top: 34px;
+        background: var(--line);
+      }
+
+      .install-step {
+        min-height: 168px;
+        padding: 24px;
+        background: #fff;
+      }
+
+      .install-step span {
+        color: var(--green);
+        font-size: 13px;
+        font-weight: 780;
+      }
+
+      .install-step strong {
+        display: block;
+        margin: 18px 0 8px;
+        color: var(--ink);
+        font-size: 22px;
+        line-height: 1.18;
+      }
+
+      .install-step p {
+        margin-bottom: 0;
+        color: var(--muted);
+        line-height: 1.56;
+      }
+
+      .comparison {
+        background: #fff;
+        border-block: 1px solid var(--line);
+      }
+
+      .compare-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .compare-card {
+        display: grid;
+        align-content: start;
+        min-height: 360px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 24px;
+        background: #fbfbf9;
+      }
+
+      .compare-card.primary {
+        border-color: rgba(28, 155, 104, 0.34);
+        background: #f6fbf8;
+      }
+
+      .compare-card h3 {
+        margin-bottom: 10px;
+        color: var(--ink);
+        font-size: 24px;
+      }
+
+      .compare-card p {
+        margin-bottom: 20px;
+        color: var(--muted);
+        line-height: 1.56;
+      }
+
+      .compare-list {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .compare-list li {
+        display: grid;
+        grid-template-columns: 20px 1fr;
+        gap: 10px;
+        color: #42506a;
+        line-height: 1.45;
+      }
+
+      .compare-list li::before {
+        content: "✓";
+        color: var(--green);
+        font-weight: 820;
+      }
+
+      .compare-card.muted .compare-list li::before {
+        content: "•";
+        color: var(--muted);
+      }
+
+      .identity {
+        display: grid;
+        grid-template-columns: 260px minmax(0, 1fr);
+        gap: 52px;
+        align-items: center;
+      }
+
+      .identity-logo {
+        width: 240px;
+        height: 240px;
+        border-radius: 54px;
+        box-shadow: 0 26px 74px rgba(9, 17, 31, 0.12);
+      }
+
+      .identity p {
+        margin: 22px 0 0;
+        max-width: 640px;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.65;
+      }
+
+      .swatches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 24px;
+      }
+
+      .swatch {
+        display: inline-flex;
+        min-height: 34px;
+        align-items: center;
+        gap: 9px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0 12px;
+        background: #fff;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .swatch::before {
+        content: "";
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background: var(--swatch);
+      }
+
+      footer {
+        border-top: 1px solid var(--line);
+        padding: 34px 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 1040px) {
+        .hero {
+          min-height: auto;
+          padding-bottom: 72px;
+        }
+
+        .hero-copy {
+          max-width: 720px;
+        }
+
+        .hero-stage {
+          position: relative;
+          top: auto;
+          right: auto;
+          width: min(100%, 720px);
+          height: 640px;
+          margin: 48px auto 0;
+        }
+
+        .peek {
+          display: none;
+        }
+
+        .section-head,
+        .command-flow,
+        .identity {
+          grid-template-columns: 1fr;
+        }
+
+        .feature-grid,
+        .install-strip,
+        .compare-grid,
+        .principles {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 720px) {
+        .shell {
+          width: calc(100vw - 24px);
+        }
+
+        header {
+          position: sticky;
+        }
+
+        nav {
+          min-height: 64px;
+        }
+
+        .links,
+        nav .button {
+          display: none;
+        }
+
+        .hero {
+          padding: 48px 0 58px;
+        }
+
+        .hero-copy,
+        .lead {
+          width: calc(100vw - 24px);
+          max-width: calc(100vw - 24px);
+        }
+
+        .hero-actions {
+          display: grid;
+          grid-template-columns: 1fr;
+        }
+
+        .hero-actions .button {
+          width: 100%;
+          white-space: normal;
+          text-align: center;
+        }
+
+        h1 {
+          font-size: 54px;
+        }
+
+        .lead {
+          font-size: 17px;
+          overflow-wrap: normal;
+          width: auto;
+          max-width: 26ch;
+        }
+
+        .proof-row {
+          display: grid;
+          grid-template-columns: 1fr;
+          max-width: 260px;
+        }
+
+        .hero-stage {
+          height: 590px;
+        }
+
+        .stage-browser {
+          width: 94%;
+          min-height: 330px;
+          right: -24px;
+          top: 190px;
+        }
+
+        .stage-logo {
+          width: 124px;
+          height: 124px;
+          border-radius: 30px;
+          top: 118px;
+        }
+
+        .intent-card {
+          left: 0;
+          width: min(340px, calc(100vw - 36px));
+        }
+
+        .intent-card p {
+          font-size: 19px;
+        }
+
+        .auto-stack {
+          left: 0;
+          bottom: 72px;
+          width: min(310px, calc(100vw - 28px));
+        }
+
+        .stage-command {
+          bottom: 78px;
+          width: min(300px, 86%);
+        }
+
+        .stage-result {
+          right: 0;
+          width: min(250px, 76%);
+        }
+
+        .route {
+          left: 104px;
+          top: 180px;
+          width: 220px;
+        }
+
+        section {
+          padding: 68px 0;
+        }
+
+        .feature-grid,
+        .install-strip,
+        .compare-grid,
+        .principles {
+          grid-template-columns: 1fr;
+        }
+
+        .identity-logo {
+          width: 190px;
+          height: 190px;
+          border-radius: 42px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav class="shell" aria-label="Main navigation">
+        <a class="brand" href="#">
+          <img src="./assets/my-browser-logo-ai.png" alt="My Browser logo">
+          <span>My Browser</span>
+        </a>
+        <div class="links">
+          <a href="#why">Why</a>
+          <a href="#flow">Flow</a>
+          <a href="#compare">Compare</a>
+          <a href="#principles">Principles</a>
+          <a href="#logo">Logo</a>
+        </div>
+        <a class="button secondary" href="https://github.com/">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="shell">
+          <div class="hero-copy">
+            <div class="eyebrow">Install the skill, automate the real browser</div>
+            <h1>Just ask.<br>AI handles<br>the browser.</h1>
+            <p class="lead">Install the skill once. After that, the agent can set up the local bridge, use your logged-in Chrome, create a quiet tab group, operate the page, and verify the result.</p>
+            <div class="hero-actions">
+              <a class="button" href="#flow">See the simple loop</a>
+              <a class="button secondary" href="#compare">Compare the tools</a>
+            </div>
+            <div class="proof-row" aria-label="Product qualities">
+              <span>One skill install</span>
+              <span>AI setup and recovery</span>
+              <span>Real Chrome login state</span>
+              <span>Simple commands</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-stage" aria-label="Animated product workflow">
+          <img class="stage-logo" src="./assets/my-browser-logo-ai.png" alt="">
+          <div class="intent-card">
+            <div class="label">What the user says</div>
+            <p>“Upload this video to the creator platform and stop before final publish.”</p>
+            <div class="intent-meta">
+              <span>Skill installed</span>
+              <span>AI chooses My Browser</span>
+              <span>Real Chrome</span>
+            </div>
+          </div>
+          <svg class="route" viewBox="0 0 340 160" aria-hidden="true">
+            <path d="M6 142 C 88 18, 214 18, 328 92"></path>
+          </svg>
+          <div class="stage-browser">
+            <div class="stage-top">
+              <div class="traffic" aria-hidden="true">
+                <i></i><i></i><i></i>
+              </div>
+              <div class="tab-strip">
+                <div class="tab user"></div>
+                <div class="tab group"></div>
+                <div class="tab user"></div>
+              </div>
+            </div>
+            <div class="page-lines" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="upload-panel">
+              <strong>Creator upload page</strong>
+              <span>Logged-in state, cookies, extensions, and browser preferences stay in place.</span>
+            </div>
+          </div>
+          <div class="auto-stack" aria-label="Agent automation steps">
+            <div class="auto-step"><i>1</i><span>Start local bridge and check extension</span></div>
+            <div class="auto-step"><i>2</i><span>Create background Chrome group</span></div>
+            <div class="auto-step"><i>3</i><span>Upload, fill, inspect, screenshot</span></div>
+            <div class="auto-step"><i>4</i><span>Return verified state to the agent</span></div>
+          </div>
+          <div class="stage-command">
+            <div class="label">Natural request</div>
+            <div class="mono">
+              Use My Browser skill<br>
+              Upload this video<br>
+              <span class="blue">Agent handles setup + steps</span>
+            </div>
+          </div>
+          <div class="stage-result">
+            <div class="label">AI handles the details</div>
+            <div class="mono">
+              <span class="green">skill ready: true</span><br>
+              Chrome group created<br>
+              login reused<br>
+              verified: true
+            </div>
+          </div>
+        </div>
+
+        <div class="peek">
+          <a href="#why">Scroll for the simple model ↓</a>
+        </div>
+      </section>
+
+      <section id="why">
+        <div class="shell">
+          <div class="section-head">
+            <h2>All browser automation gets easier when the browser is already yours.</h2>
+            <p>My Browser turns the messy parts of automation into a skill workflow: setup, recovery, tab grouping, page observation, upload, forms, screenshots, and verification all become agent-friendly defaults.</p>
+          </div>
+          <div class="feature-grid">
+            <article class="feature">
+              <b>SIMPLE START</b>
+              <h3>Install the skill once</h3>
+              <p>After the skill is installed, agents know the right CLI, recovery commands, browser extension path, and safe fallback rules.</p>
+            </article>
+            <article class="feature">
+              <b>SMART RECOVERY</b>
+              <h3>The AI prepares the path</h3>
+              <p><code>ensure</code>, <code>doctor</code>, and setup guidance help the agent repair local state before asking the user for help.</p>
+            </article>
+            <article class="feature">
+              <b>REAL BROWSER</b>
+              <h3>Tasks run where you are logged in</h3>
+              <p>The agent works inside local Chrome, keeps automation in a dedicated group, and avoids empty throwaway browser sessions.</p>
+            </article>
+          </div>
+          <div class="install-strip" aria-label="Setup story">
+            <div class="install-step">
+              <span>01</span>
+              <strong>Install skill</strong>
+              <p>Codex learns when to use My Browser and which commands keep browser work simple.</p>
+            </div>
+            <div class="install-step">
+              <span>02</span>
+              <strong>AI configures</strong>
+              <p>The agent starts the local service, checks the extension, and explains only the browser approvals that still need a person.</p>
+            </div>
+            <div class="install-step">
+              <span>03</span>
+              <strong>Automate naturally</strong>
+              <p>Open pages, upload files, fill forms, inspect state, screenshot, and verify results through one small command language.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="flow" class="flow-section">
+        <div class="shell command-flow">
+          <div>
+            <div class="eyebrow">Default agent loop</div>
+            <h2>Simple commands, smart behavior underneath.</h2>
+            <div class="steps">
+              <div class="step">
+                <div class="step-num">1</div>
+                <div>
+                  <h3>Prepare automatically</h3>
+                  <p><code>ensure</code> starts the local agent, checks extension heartbeat, clears stale queues, and stays in the background.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">2</div>
+                <div>
+                  <h3>Use the real page</h3>
+                  <p><code>open</code> creates or reuses the automation group, preserves login state, and keeps user focus where it was.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">3</div>
+                <div>
+                  <h3>Let the agent finish the job</h3>
+                  <p><code>snapshot</code>, <code>@e</code> refs, file upload, field checks, diagnostics, and screenshots give the agent enough context to act and verify.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <pre><code>$ my-browser ensure
+$ my-browser doctor
+$ my-browser open "https://example.com/upload"
+$ my-browser snapshot &lt;tabId&gt; -n 30
+$ my-browser fill @e7 "A quiet local browser tool"
+$ my-browser upload @e12 ./video.mp4
+$ my-browser fields &lt;tabId&gt; title="#title" upload=".file-row"
+$ my-browser screenshot &lt;tabId&gt; --annotate /tmp/page.png
+$ my-browser detach</code></pre>
+            <div class="code-note">
+              <span>No system mouse</span>
+              <span>No address bar input</span>
+              <span>No silent empty browser fallback</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="compare" class="comparison">
+        <div class="shell">
+          <div class="section-head">
+            <h2>Built for a different kind of browser automation.</h2>
+            <p>Agent Browser and Browser MCP are useful, but My Browser optimizes for one specific promise: let agents operate the user’s real local Chrome with less setup, less context noise, and fewer interruptions.</p>
+          </div>
+          <div class="compare-grid">
+            <article class="compare-card primary">
+              <h3>My Browser</h3>
+              <p>Best when the task needs the user’s current Chrome, real login state, background tab groups, uploads, diagnostics, and a skill that tells agents how to recover.</p>
+              <ul class="compare-list">
+                <li>Uses existing local Chrome and its login state.</li>
+                <li>Creates a dedicated automation group by default.</li>
+                <li>Returns compact snapshots, fields, requests, and errors.</li>
+                <li>Skill teaches setup, recovery, safe confirmations, and fallback rules.</li>
+              </ul>
+            </article>
+            <article class="compare-card muted">
+              <h3>Agent Browser</h3>
+              <p>Excellent agent protocol inspiration: daemon sessions, refs, screenshots, waits, and a clear command model. It usually shines for dev verification and controlled browser sessions.</p>
+              <ul class="compare-list">
+                <li>Strong CLI vocabulary for web testing and dev server checks.</li>
+                <li>Great ref lifecycle and screenshot workflows.</li>
+                <li>Often works in an automation browser or managed session.</li>
+                <li>Less focused on the user’s already-open Chrome profile.</li>
+              </ul>
+            </article>
+            <article class="compare-card muted">
+              <h3>Browser MCP</h3>
+              <p>Helpful for general browser control inside MCP clients. My Browser adds a local product layer for this workflow: skill-first guidance, Chrome extension bridge, and background group defaults.</p>
+              <ul class="compare-list">
+                <li>Good for basic navigation, screenshots, and inspection.</li>
+                <li>Depends heavily on the MCP host and browser connection state.</li>
+                <li>Has fewer opinionated recovery paths for local extension setup.</li>
+                <li>Can require more manual agent reasoning around page state.</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="principles">
+        <div class="shell">
+          <div class="section-head">
+            <h2>Designed around trust, focus, and small outputs.</h2>
+            <p>The CLI behaves like a careful local collaborator: it handles repetitive browser work, explains blocked states, and asks before risky actions.</p>
+          </div>
+          <div class="principles">
+            <div class="principle">
+              <strong>Background by default</strong>
+              <p>Automation tabs stay grouped and inactive, so users can keep typing, reading, or meeting while the agent works.</p>
+            </div>
+            <div class="principle">
+              <strong>Clear recovery</strong>
+              <p>When the extension is offline, the CLI reports the exact missing piece and avoids pretending it already fixed Chrome permissions.</p>
+            </div>
+            <div class="principle">
+              <strong>Compact observations</strong>
+              <p>Agents receive the fields, refs, and diagnostics they need without pulling entire pages into the conversation.</p>
+            </div>
+            <div class="principle">
+              <strong>Human confirmation</strong>
+              <p>Publishing, deleting, submitting, and other high-risk actions pause behind an explicit confirmation flow.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="logo">
+        <div class="shell identity">
+          <img class="identity-logo" src="./assets/my-browser-logo-ai.png" alt="My Browser logo">
+          <div>
+            <div class="eyebrow">Identity</div>
+            <h2>A calm mark for a local browser companion.</h2>
+            <p>The symbol keeps only two ideas: a real browser window and a local connection point. It reads clearly in the Chrome toolbar and still feels warm enough for a tool that works beside a person.</p>
+            <div class="swatches">
+              <span class="swatch" style="--swatch:#09111f">Ink #09111F</span>
+              <span class="swatch" style="--swatch:#f7f8f6">Soft #F7F8F6</span>
+              <span class="swatch" style="--swatch:#2f80ed">Blue #2F80ED</span>
+              <span class="swatch" style="--swatch:#1c9b68">Green #1C9B68</span>
+              <span class="swatch" style="--swatch:#e8ded2">Clay #E8DED2</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="shell">My Browser CLI and Skill. Local-first Chrome automation for Codex.</div>
+    </footer>
+  </body>
+</html>

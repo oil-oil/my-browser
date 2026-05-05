@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Real Browser Operator Test</title>
+    <style>
+      body { font: 16px/1.5 -apple-system, BlinkMacSystemFont, sans-serif; max-width: 720px; margin: 40px auto; }
+      label, input, textarea, select, button, a { display: block; margin: 12px 0; }
+      input, textarea, select { width: 320px; padding: 8px; }
+      button { padding: 8px 12px; }
+      #status { margin-top: 20px; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <h1>Real Browser Operator Test</h1>
+    <a id="example-link" href="#linked">Example Link</a>
+    <label for="name">Name</label>
+    <input id="name" name="name" placeholder="Name">
+    <label for="notes">Notes</label>
+    <textarea id="notes" name="notes" placeholder="Notes"></textarea>
+    <select id="choice">
+      <option value="">Pick one</option>
+      <option value="alpha">Alpha</option>
+      <option value="beta">Beta</option>
+    </select>
+    <button id="submit" type="button">Submit</button>
+    <button id="delayed" type="button">Show Delayed Text</button>
+    <p id="status">Idle</p>
+    <script>
+      window.appReady = true;
+      document.querySelector("#submit").addEventListener("click", () => {
+        document.querySelector("#status").textContent = "Submitted: " + document.querySelector("#name").value;
+      });
+      document.querySelector("#delayed").addEventListener("click", () => {
+        setTimeout(() => {
+          document.querySelector("#status").textContent = "Delayed Success";
+        }, 300);
+      });
+    </script>
+  </body>
+</html>
